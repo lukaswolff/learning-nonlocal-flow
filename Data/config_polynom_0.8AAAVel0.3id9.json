@@ -1,0 +1,34 @@
+{
+    "conveyor": {
+        "type": "linear",
+        "size": [
+            0.8,
+            2.5,
+            0.2
+        ],
+        "velocity": [
+            0,
+            0.3,
+            0
+        ]
+    },
+    "regulator1": {
+        "type": "polynom_0.8AAA",
+        "position": [
+            0.7
+        ],
+        "size": [
+            1
+        ]
+    },
+    "cargo": {
+        "type": "cylinder",
+        "path": "initialPositions/MD_centers260.csv",
+        "mass": 19,
+        "random": true,
+        "size": [
+            0.012,
+            0.008
+        ]
+    }
+}
