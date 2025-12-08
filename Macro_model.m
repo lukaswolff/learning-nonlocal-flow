@@ -1039,7 +1039,7 @@ classdef Macro_model < handle
                 % plot(X_Wand,[0.6 0.6],'k','LineWidth',1)
                 % plot(X_Wand,[0.025 0.025],'k','LineWidth',1)
                 
-                %clim([0,1])
+                clim([0,1])
                 colorbar
                 set(gca,'YDir','normal')
                 %surf(y,x,rho(:,:,k));
