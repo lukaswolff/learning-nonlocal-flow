@@ -5,13 +5,13 @@
 MM = Macro_model();
 
 %EITHER Load demo setup
-MM.load_setup('Data\config_Reg30Cyl1.45id5398.json');
+MM.load_setup('Data\config_Reg25Cyl1.45id5308.json');
 
 %OR Select Setup file of json format
 %MM.load_setup(0);
 
 %Load observed data
-MM.load_data('Data\positionsVelReg30Cyl1.45id5398.csv');
+MM.load_data('Data\positionsVelReg25Cyl1.45id5308.csv');
 
 %OR Select suitable file of csv format
 %MM.load_data(0);
@@ -43,6 +43,16 @@ NT = MM.NT;
 MM.compute_Macro_NN(trainedNetNN,NT);
 MM.plot_net();
 
-%%To be continued
+
+%% Sampling and Neural-Network Training
+% Will train new NetworkstrainedNetConvolution and trainedNetNN
+
+%Sample datapoints from the flow data of different geometries
+DataCollection
+
+% Train Networks based on these samples
+Machine_Learning
+
+
 
 

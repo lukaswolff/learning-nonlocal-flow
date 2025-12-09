@@ -619,8 +619,9 @@ classdef Macro_model < handle
 
                     sample.density = single(zeros(2*scopesize_y+1,2*scopesize_x+1));
                     sample.density(1+offset_y_l : 2*scopesize_y+1 - offset_y_r,1+offset_x_l : 2*scopesize_x+1 - offset_x_r) = self.rho_init(scope_y,scope_x,k);
-
-                    sample.obstacle = boolean(ones(2*scopesize_y+1,2*scopesize_x+1));
+                    
+                    % Use logical datatype for obstacle for speed
+                    sample.obstacle = true(2*scopesize_y+1,2*scopesize_x+1);
                     sample.obstacle(1+offset_y_l : 2*scopesize_y+1 - offset_y_r,1+offset_x_l : 2*scopesize_x+1 - offset_x_r) = self.obstacle(scope_y,scope_x);
 
                     sample.velocity = squeeze(self.data(round(1+f*(k-1)),i,4:5)) - [0;self.v_T];
@@ -996,8 +997,9 @@ classdef Macro_model < handle
                 % plot(X_Regler,Y_Regler,'k','LineWidth',2)
                 % plot(X_Wand,[0.6 0.6],'k','LineWidth',1)
                 % plot(X_Wand,[0.025 0.025],'k','LineWidth',1)
-                clim([0,1.5])
-                colorbar
+                clim([0,2])
+                c = colorbar;             
+                c.Label.String = 'Density';
                 set(gca,'YDir','normal')
                 %surf(y,x,rho(:,:,k));
                 pause(0.001)
@@ -1039,8 +1041,9 @@ classdef Macro_model < handle
                 % plot(X_Wand,[0.6 0.6],'k','LineWidth',1)
                 % plot(X_Wand,[0.025 0.025],'k','LineWidth',1)
                 
-                clim([0,1])
-                colorbar
+                clim([0,1.5])
+                c = colorbar;             
+                c.Label.String = 'Density';    
                 set(gca,'YDir','normal')
                 %surf(y,x,rho(:,:,k));
                 pause(0.001)
@@ -1315,15 +1318,10 @@ classdef Macro_model < handle
             % Computation Numerical Fluxes
             for k=1:NT
                 k   
-                % if k == 50
-                %     a = 3;
-                % end
                 [vx,vy] = self.apply_net(min(1,rho(:,:,k)),net); %Velocities in cell center
                 vx(2:end,:) = .5*(vx(1:end-1,:)+vx(2:end,:)); %vx(i,j) is approxiate velocity on interface i-1/2,j
                 vy(:,2:end) = .5*(vy(:,1:end-1)+vy(:,2:end)); %vx(i,j) is approxiate velocity on interface i,j-1/2
 
-                % vx = vx + self.Vx;
-                % vy = vy + self.Vy;
 
                 self.velocities_NN{1}(:,:,k) = vx; %orth to flow
                 self.velocities_NN{2}(:,:,k) = vy; %direction of flow
@@ -1437,8 +1435,79 @@ classdef Macro_model < handle
          
         end
 
+        function velocityfield_NN(self,k)
+
+            % Plot the velocityfield computed by the neural network at
+            % timepoint k
+
+            vy_ = self.velocities_NN{2}(:,:,k);
+            vx_ = self.velocities_NN{1}(:,:,k);
+            
+            %Initialize
+            dimensions = size(self.rho_net(:,:,k))
+            v = zeros(dimensions);
+            vy = zeros(dimensions);
+            vx = zeros(dimensions);
+
+
+            %Only plot the velocityvector where there is mass
+            f = find(round(self.rho_net(:,:,k),2)); %rho>0.005
+            f2 = find(round(self.rho_net(:,:,k),1)); %rho > 0.5
+            v(f2) = self.Vy(f2);
+            vy(f2) = vy_(f2);
+            vx(f2) = vx_(f2);
+            
+
+            figure(3)
+            imagesc(self.rho_net(:,:,k)-self.obstacle);
+            set(gca,'YDir','normal')
+            hold on
+
+            clim([-1,2])
+            colormap(bone)
+            colorbar
+            
+            r = 3; %Only every r'th pixel in direction of flow gets an arrow
+            quiver(1:r:dimensions(2),1:1:dimensions(1),vy(1:1:end,1:r:end)+v(1:1:end,1:r:end),vx(1:1:end,1:r:end),'r')
+            hold off
+        end
+        
+        function plot_velocityfield_NN(self)
+            for k=1:4:self.NT
+                vy_ = self.velocities_NN{2}(:,:,k);
+                vx_ = self.velocities_NN{1}(:,:,k);
+
+                %Initialize
+                dimensions = size(self.rho_net(:,:,k))
+                v = zeros(dimensions);
+                vy = zeros(dimensions);
+                vx = zeros(dimensions);
+
+                %Only plot the velocityvector where there is mass
+                f = find(round(self.rho_net(:,:,k),2)); %rho>0.005
+                f2 = find(round(self.rho_net(:,:,k),1)); %rho > 0.5
+                v(f2) = self.Vy(f2);
+                vy(f2) = vy_(f2);
+                vx(f2) = vx_(f2);
+
+
+                figure(3)
+                imagesc(self.rho_net(:,:,k)-self.obstacle);
+                set(gca,'YDir','normal')
+                hold on
+
+                clim([-1,1])
+                colormap(bone)
+                colorbar
+
+                r = 3; %Only every r'th pixel in direction of flow gets an arrow
+                quiver(1:r:dimensions(2),1:1:dimensions(1),vy(1:1:end,1:r:end)+v(1:1:end,1:r:end),vx(1:1:end,1:r:end),'r')
+                hold off
+                pause(0.001)
+            end
+        end
     end
-    
+
 
 end
 
